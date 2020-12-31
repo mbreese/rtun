@@ -49,7 +49,7 @@ Start the local daemon
 
 Connect to the remote server
 
-    [username@local ~]$ ssh -R $(realpath rtun.sock):/home/username/rtun.sock username@remote-host
+    [username@local ~]$ ssh -R /home/username/rtun.sock:$(realpath rtun.sock) username@remote-host
 
 Send a message back to your local machine
 
