@@ -35,7 +35,7 @@ than protecting a file on the server.)*
 
 `notify` - sends a desktop notification to the local computer
 
-`send` - send a file (or directory) to the local computer
+`up` - upload a file (or directory) to the local computer
 
 `view` - open a file on the local computer
 
