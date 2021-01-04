@@ -32,26 +32,30 @@ var serverCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		if socketFilename == "" {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				panic(err)
+			}
+			os.MkdirAll(path.Join(home, ".rtun"), 0700)
+			socketFilename = path.Join(home, ".rtun", "rtun.sock")
+		}
+
+		_, err := os.Stat(socketFilename)
+		if err == nil || !os.IsNotExist(err) {
+			fmt.Fprintf(os.Stderr, "Socket file already in use: %s\n", socketFilename)
+			os.Exit(1)
+		}
+
 		if daemonize {
 			pid, _ := fork(stdout)
 			fmt.Printf("%d\n", pid)
 			os.Exit(0)
 		}
 
-		var svr *server.Server
-		if socketFilename != "" {
-			svr = server.NewServer(socketFilename, downloadDir, verbose)
-		} else {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				panic(err)
-			}
-			os.MkdirAll(path.Join(home, ".rtun"), 0700)
-
-			svr = server.NewServer(path.Join(home, ".rtun", "rtun.sock"), downloadDir, verbose)
-		}
-
+		svr := server.NewServer(socketFilename, downloadDir, verbose)
 		svr.Listen()
+
 	},
 }
 

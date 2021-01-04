@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"log"
 
@@ -19,10 +18,6 @@ var shutdownCmd = &cobra.Command{
 	Hidden: true,
 
 	Args: func(cmd *cobra.Command, args []string) error {
-		if socketFilename == "" {
-			return errors.New("Missing socket")
-		}
-
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {

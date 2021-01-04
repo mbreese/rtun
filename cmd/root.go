@@ -45,7 +45,7 @@ func connect() *client.Client {
 				continue
 			}
 
-			if f.Name()[:9] == "rtun.sock" {
+			if len(f.Name()) > 8 && f.Name()[:9] == "rtun.sock" {
 				client, err := client.Connect(path.Join(home, ".rtun", f.Name()), verbose)
 
 				if err != nil {
