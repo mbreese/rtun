@@ -1,9 +1,9 @@
 SOURCES := $(shell find . -name '*.go')
 
-bin/rtun.macos: bin/rtun
+bin/rtun.macos: bin/rtun.linux
 	GOOS=darwin GOARCH=amd64 go build -o bin/rtun.macos main.go
 
-bin/rtun: go.mod go.sum $(SOURCES) 
+bin/rtun.linux: go.mod go.sum $(SOURCES) 
 	go build -o bin/rtun main.go
 
 run:
