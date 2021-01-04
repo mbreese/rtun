@@ -36,7 +36,7 @@ type Client struct {
 // Connect - connect to the server
 func Connect(fname string, verbose bool) (*Client, error) {
 
-	conn, err := net.Dial("unix", fname)
+	conn, err := net.DialTimeout("unix", fname, 1*time.Minute)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to find a valid server socket (1): %s, %s", fname, err)
 	}
