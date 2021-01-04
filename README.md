@@ -47,7 +47,7 @@ Start the local daemon
 
     [username@local ~] $ rtun server -d -s rtun.sock
 
-Connect to the remote server
+Connect to the remote server (note, you must provide absolute pathnames to the socket here, in the format: `-R remote_file:local_file`)
 
     [username@local ~]$ ssh -R /home/username/rtun.sock:/Users/username/rtun.sock username@remote-host
 
