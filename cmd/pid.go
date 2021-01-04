@@ -1,15 +1,14 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
-
-	"github.com/mbreese/rtun/client"
 
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	pidCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Server socket")
+	pidCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Socket filename (default $HOME/.rtun/rtun.sock.*)")
 	rootCmd.AddCommand(pidCmd)
 }
 
@@ -18,14 +17,16 @@ var pidCmd = &cobra.Command{
 	Short:  "Get the PID for the running server",
 	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := client.Connect(socketFilename)
+		client := connect()
 
 		defer client.Close()
 
-		err := client.PID()
+		ret, err := client.PID()
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		fmt.Println(ret)
 
 	},
 }

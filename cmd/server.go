@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -13,26 +14,21 @@ import (
 )
 
 var daemonize = false
-var verbose = false
 var stdout string
 var downloadDir string
 
 func init() {
+	serverCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Socket filename (default $HOME/.rtun/rtun.sock)")
 	serverCmd.Flags().BoolVarP(&daemonize, "daemon", "d", false, "Run in the background")
-	serverCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
-	serverCmd.Flags().StringVarP(&stdout, "stdout", "o", "", "Write output log to this file")
+	serverCmd.Flags().StringVarP(&stdout, "log", "l", "", "Write output log to this file (in daemon mode, default $HOME/.rtun/rtun.log)")
 	serverCmd.Flags().StringVarP(&downloadDir, "dir", "", ".", "Save downloads to this directory")
 	rootCmd.AddCommand(serverCmd)
 }
 
 var serverCmd = &cobra.Command{
-	Use:   "server <socket_file>",
+	Use:   "server",
 	Short: "Starts the rtun server",
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 || args[0] == "-" {
-			// fmt.Printf("%v\n", args)
-			return fmt.Errorf("missing local socket filename")
-		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -42,7 +38,19 @@ var serverCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		svr := server.NewServer(args[0], downloadDir, verbose)
+		var svr *server.Server
+		if socketFilename != "" {
+			svr = server.NewServer(socketFilename, downloadDir, verbose)
+		} else {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				panic(err)
+			}
+			os.MkdirAll(path.Join(home, ".rtun"), 0700)
+
+			svr = server.NewServer(path.Join(home, ".rtun", "rtun.sock"), downloadDir, verbose)
+		}
+
 		svr.Listen()
 	},
 }
@@ -65,13 +73,20 @@ func fork(stdout string) (int, error) {
 	// fmt.Printf("%v\n", args)
 
 	var stdoutf *os.File
-	if stdout != "" {
-		var err error
-		stdoutf, err = os.OpenFile(stdout, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0700)
+	if stdout == "" {
+		home, err := os.UserHomeDir()
 		if err != nil {
-			fmt.Printf("Error setting up a file to write to stdout: %s\n", stdout)
-			log.Fatal(err)
+			panic(err)
 		}
+		os.MkdirAll(path.Join(home, ".rtun"), 0700)
+		stdout = path.Join(home, ".rtun", "rtun.log")
+	}
+
+	var err error
+	stdoutf, err = os.OpenFile(stdout, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0700)
+	if err != nil {
+		fmt.Printf("Error setting up a file to write to stdout: %s\n", stdout)
+		log.Fatal(err)
 	}
 
 	cmd := exec.Command(os.Args[0], args...)

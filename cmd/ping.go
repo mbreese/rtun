@@ -1,16 +1,14 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
-
-	"github.com/mbreese/rtun/client"
 
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	pingCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Server socket")
-	pingCmd.MarkFlagRequired("socket")
+	pingCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Socket filename (default $HOME/.rtun/rtun.sock.*)")
 	rootCmd.AddCommand(pingCmd)
 }
 
@@ -19,14 +17,16 @@ var pingCmd = &cobra.Command{
 	Short:  "Ping the rtun server",
 	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := client.Connect(socketFilename)
+		client := connect()
 
 		defer client.Close()
 
-		err := client.Ping()
+		ret, err := client.Ping()
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		fmt.Println(ret)
 
 	},
 }

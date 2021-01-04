@@ -34,26 +34,35 @@ type Client struct {
 // }
 
 // Connect - connect to the server
-func Connect(fname string) *Client {
-
-	// fmt.Printf("Connecting to: %s\n", fname)
+func Connect(fname string, verbose bool) (*Client, error) {
 
 	conn, err := net.Dial("unix", fname)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("Unable to find a valid server socket (1): %s, %s", fname, err)
 	}
 
-	return &Client{
+	client := &Client{
 		socketFilename: fname,
 		conn:           conn,
 		reader:         bufio.NewReader(conn),
 		closed:         false,
 	}
+	ret, err := client.Ping()
+	if err != nil || ret != "OK PONG" {
+		client.Close()
+		return nil, fmt.Errorf("Unable to find a valid server socket (2): %s, %s", fname, err)
+	}
+	if verbose {
+		fmt.Printf("Connected to socket: %s\n", fname)
+	}
+	return client, nil
 }
 
 // Close client connection
 func (c *Client) Close() {
-	c.conn.Close()
+	if c.conn != nil {
+		c.conn.Close()
+	}
 }
 
 func (c *Client) writeString(s string) (int, error) {
@@ -88,74 +97,42 @@ func (c *Client) readLine() (string, error) {
 }
 
 // Ping server
-func (c *Client) Ping() error {
+func (c *Client) Ping() (string, error) {
 	c.writeString("PING\r\n")
 
-	line, err := c.readLine()
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(line)
-	return nil
+	return c.readLine()
 }
 
 // PID - get the PID of the server process
-func (c *Client) PID() error {
+func (c *Client) PID() (string, error) {
 	c.writeString("PID\r\n")
 
-	line, err := c.readLine()
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(line)
-	return nil
+	return c.readLine()
 }
 
 // Shutdown server
-func (c *Client) Shutdown() error {
+func (c *Client) Shutdown() (string, error) {
 	c.writeString("SHUTDOWN\r\n")
 
-	line, err := c.readLine()
+	return c.readLine()
 
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(line)
-	return nil
 }
 
 // Echo server
-func (c *Client) Echo(val string) error {
+func (c *Client) Echo(val string) (string, error) {
 	c.writeString(fmt.Sprintf("ECHO %s\r\n", val))
 
-	line, err := c.readLine()
+	return c.readLine()
 
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(line)
-	return nil
 }
 
 // Notify send a notification to the server
-func (c *Client) Notify(val string) error {
+func (c *Client) Notify(val string) (string, error) {
 	host, _ := os.Hostname()
 	c.writeString(fmt.Sprintf("NOTIFY %s %s\r\n", host, val))
 
-	line, err := c.readLine()
+	return c.readLine()
 
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(line)
-	return nil
 }
 
 // View a file on the server (sends the file, saving to a temp file, and then opens it)

@@ -2,16 +2,14 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"log"
-
-	"github.com/mbreese/rtun/client"
 
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	shutdownCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Server socket")
-	shutdownCmd.MarkFlagRequired("socket")
+	shutdownCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Socket filename (default $HOME/.rtun/rtun.sock.*)")
 	rootCmd.AddCommand(shutdownCmd)
 }
 
@@ -28,14 +26,16 @@ var shutdownCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		client := client.Connect(socketFilename)
+		client := connect()
 
 		defer client.Close()
 
-		err := client.Shutdown()
+		ret, err := client.Shutdown()
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		fmt.Println(ret)
 
 	},
 }

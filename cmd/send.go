@@ -15,14 +15,13 @@ import (
 var recurse bool
 
 func init() {
-	sendCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Server socket")
+	sendCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Socket filename (default $HOME/.rtun/rtun.sock.*)")
 	sendCmd.Flags().BoolVarP(&recurse, "recurse", "r", false, "Recursively upload directories")
-	sendCmd.MarkFlagRequired("socket")
 	rootCmd.AddCommand(sendCmd)
 }
 
 var sendCmd = &cobra.Command{
-	Use:   "up <local_file> [<remote_filename>]",
+	Use:   "send <local_file> [<remote_filename>]",
 	Short: "Upload a file back to the local machine",
 	Run: func(cmd *cobra.Command, args []string) {
 		// var local string
@@ -34,7 +33,7 @@ var sendCmd = &cobra.Command{
 		if len(args) > 1 {
 			remote = args[len(args)-1]
 		}
-		client := client.Connect(socketFilename)
+		client := connect()
 		defer client.Close()
 
 		for _, local := range args[0 : len(args)-1] {

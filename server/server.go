@@ -58,7 +58,7 @@ func NewServer(socket string, saveDir string, verbose bool) *Server {
 // Listen - start listening on the socket
 func (s Server) Listen() {
 	var wg sync.WaitGroup
-	fmt.Printf("socket: %s, saveDir: %s, verbose: %t\n", s.socketFilename, s.saveDir, s.verbose)
+	// fmt.Printf("socket: %s, saveDir: %s, verbose: %t\n", s.socketFilename, s.saveDir, s.verbose)
 
 	cTerm := make(chan os.Signal)
 	signal.Notify(cTerm, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP)

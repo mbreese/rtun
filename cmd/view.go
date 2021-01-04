@@ -5,14 +5,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/mbreese/rtun/client"
-
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	viewCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Server socket")
-	viewCmd.MarkFlagRequired("socket")
+	viewCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Socket filename (default $HOME/.rtun/rtun.sock.*)")
 	rootCmd.AddCommand(viewCmd)
 }
 
@@ -34,7 +31,7 @@ var viewCmd = &cobra.Command{
 			log.Fatal("Cannot view a directory")
 		}
 
-		client := client.Connect(socketFilename)
+		client := connect()
 		defer client.Close()
 
 		fmt.Printf("Viewing file: %s\n", local)
