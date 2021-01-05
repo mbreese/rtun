@@ -9,6 +9,7 @@ import (
 
 // Notify send a desktop notification
 func Notify(msg string, title string) {
+	var cmd2 *exec.Cmd
 	if msg != "" && title != "" {
 		cmd2 = exec.Command("osascript", "-e", fmt.Sprintf("display notification \"%s\" with title \"%s\"", msg, title))
 	} else if msg == "" && title != "" {
