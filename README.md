@@ -40,20 +40,44 @@ login, you can connect back to your local computer securely. You already authent
 can't trust root on the remote server, then you have bigger issues than protecting the socket file.*
 
 
-## Usage
+# Usage
 
     rtun cmd
 
 
-### Commands
+## Commands
 
-`notify` - sends a desktop notification to the local computer
+`notify` - sends a desktop notification to the local computer. Notifications are then sent to the desktop using an AppleScript (on Mac with `orascript`) or with `notify-send` on Linux.
 
-`send` - upload a file (or directory) to the local computer
+`send` - upload a file (or directory) to the local computer. Files will be saved relative to the save file path setup when the daemon is started. Files are only saved only in this save-directory, or a sub directory. This should be safe, but you don't want to start the daemon in the root directory.
 
-`view` - open a file on the local computer
+
+`view` - open a file on the local computer. View works by saving the file to a temporary location and calls the `open` (on Mac), or `xdg-open` on Linux.
 
 `server` - start the server daemon
+
+
+### Debugging commands
+
+There are also a couple commands useful for troubleshooting:
+
+`echo` - send a message from the remote server to the local computer and back to the remote server.
+
+    $ rtun echo hello world
+    hello world
+
+`ping` - test the connection to the daemon
+
+    $ rtun ping
+    OK PONG
+
+`shutdown` - shutdown the local daemon
+
+    $ rtun shutdown
+    OK Shutting down the server...
+
+
+
 
 ## Example workflow 
 
