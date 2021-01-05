@@ -24,6 +24,12 @@ var sendCmd = &cobra.Command{
 	Use:   "send <local_file> [<remote_filename>]",
 	Short: "Upload a file back to the local machine",
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			fmt.Fprintln(os.Stderr, "Missing file(s) to send...")
+			cmd.Usage()
+			os.Exit(1)
+		}
+
 		// var local string
 		var remote string
 
@@ -36,19 +42,29 @@ var sendCmd = &cobra.Command{
 		client := connect()
 		defer client.Close()
 
-		for _, local := range args[0 : len(args)-1] {
+		for i, local := range args {
+			if i > 0 && i == len(args)-1 {
+				continue
+			}
+			fmt.Printf("Local: %s, Remote: %s %d\n", local, remote, i)
 
 			finfo, err1 := os.Stat(local)
 			if err1 != nil {
-				fmt.Println(err1.Error())
-				log.Fatal(err1)
+				fmt.Fprintf(os.Stderr, "File not found: %s\n", local)
+				cmd.Usage()
+				os.Exit(1)
+
+				// fmt.Println(err1.Error())
+				// log.Fatal(err1)
 			}
 
 			// fmt.Printf("Local: %s, Remote: %s\n", local, remote)
 
 			if finfo.IsDir() {
 				if !recurse {
-					log.Fatal(fmt.Errorf("Not sending directory without --recurse/-r flag"))
+					fmt.Fprintf(os.Stderr, "Not sending directory without --recurse/-r flag\n")
+					cmd.Usage()
+					os.Exit(1)
 				}
 				err := sendDir(local, remote, client)
 				if err != nil {

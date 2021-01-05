@@ -18,7 +18,7 @@ var (
 	rootCmd = &cobra.Command{
 		Use:     "rtun",
 		Short:   "Reverse tunnel - a tunnel back to your local system (for SSH connections)",
-		Version: "0.1.2",
+		Version: "0.1.3",
 	}
 )
 
