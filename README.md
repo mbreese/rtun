@@ -4,6 +4,20 @@ RTUN is a tool for connecting back to your local computer when connected to a
 remote server via SSH. It relies on a local daemon and a UNIX socket forwarded
 to the remote server.
 
+## What do I use RTUN for?
+
+One problem that often happens when you work on remote servers is how to access data or files from the server from your local computer. Perhaps you're a data scientist and you generate a figure on the server. How do you see that figure locally? There are some tools for displaying images in a terminal, but they either have low resolution or are very difficult to use. Cloud storage like Dropbox can be used to sync data from servers, but it can be difficult to setup for individual users (it can require a developer account). And -- it can be slow as data is sent from the server to the cloud and then back to your computer.
+
+RTUN aims to solve these problem.
+
+RTUN has three major functions: 
+
+1. Sending notifications from a server to your local computer
+2. Sending files from a remote server to your local computer
+3. Viewing files from a remote server on your local computer (which is basically saving the file as a temp file and then calling `open`).
+
+So long as you have an SSH connection to the remote server (with the appropriate SSH reverse tunnel established), then you can send a notification or a file to your local computer.
+
 ## Supported operating systems
 
 Currently, the only supported operating systems are macOS and Linux. BSD
@@ -13,14 +27,14 @@ I'm not sure this is a good mechanism to use with Windows clients or not, as it 
 
 ## Security
 
-RTUN relies on UNIX sockets as opposed to IP ports. This is so that on the
+RTUN relies on UNIX sockets as opposed to IP ports or user accounts. This is so that on the
 remote server, we don't need to open a public port. All security to access the
 reverse tunnel is managed through file permissions to the socket file. This
 way, the only way to access the local computer is through a file owned by you.
 If we opened an IP port, then anyone with access to the remote server would
 also be able to connect to your local computer (to send files or
 notifications). This way, without needing to setup yet another account or
-login, you can connect back to your local computer securely. 
+login, you can connect back to your local computer securely. You already authenticated with SSH, so why add another login to the mix?
 
 *Note: This all assumes you trust anyone that also has root access on the remote server, but if you 
 can't trust root on the remote server, then you have bigger issues than protecting the socket file.*
@@ -84,3 +98,17 @@ It is possible to setup SSH to automatically remove these stale files, but it re
 Here is one way to do this:
 
     [username@local ~]$ ssh -R /home/username/.rtun/rtun.sock.$RANDOM:/Users/username/.rtun/rtun.sock remote-host
+
+### So, how do I set this up?
+
+Personally, I have a bash/zsh alias setup to connect to a remote server. This alias looks like this:
+
+    alias remote='rtun server -d; ssh -R /home/username/.rtun/rtun.sock.$RANDOM:/Users/username/.rtun/rtun.sock remote-host`
+
+*(Don't forget to create the `$HOME/.rtun` directory on both the local and remote systems!)*
+
+Then I can run `remote`. On the first run, this starts the RTUN daemon process. Then it connects to the remote server with SSH, setting up a UNIX socket reverse tunnel, with the socket name on the server to a random file name (but easily discoverable). On the server, whenever `rtun` is run, then it figures out which connection is valid. When you sign off of the server (with `exit`), the socket file is not automatically removed.
+
+The next time you run the `remote` command, it tries to start an RTUN daemon, but fails with a message saying that the socket is already in use. Then when the SSH connection is established, a new socket file is created. When you run `rtun`, the program looks for possible socket files. When the right one is found, it is used to connect back to the local RTUN daemon.
+
+In theory, I think this could also be setup using only the `.ssh/config` file, but I have not tested this.
