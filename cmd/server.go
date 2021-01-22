@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/mbreese/rtun/client"
 	"github.com/mbreese/rtun/server"
 )
 
@@ -43,8 +44,17 @@ var serverCmd = &cobra.Command{
 
 		_, err := os.Stat(socketFilename)
 		if err == nil || !os.IsNotExist(err) {
-			fmt.Fprintf(os.Stderr, "Socket file already in use: %s\n", socketFilename)
-			os.Exit(1)
+
+			// check to see if the server is still active. If not, remove the socketFile and keep going.
+			_, err := client.Connect(socketFilename, verbose)
+			if err != nil {
+				// bad client.
+				fmt.Fprintf(os.Stderr, "Socket file already in use: %s, but server not running. Starting new server.\n", socketFilename)
+				os.Remove(socketFilename)
+			} else {
+				fmt.Fprintf(os.Stderr, "Socket file already in use: %s\n", socketFilename)
+				os.Exit(1)
+			}
 		}
 
 		if daemonize {
