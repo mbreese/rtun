@@ -22,7 +22,7 @@ func init() {
 	serverCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Socket filename (default $HOME/.rtun/rtun.sock)")
 	serverCmd.Flags().BoolVarP(&daemonize, "daemon", "d", false, "Run in the background")
 	serverCmd.Flags().StringVarP(&stdout, "log", "l", "", "Write output log to this file (in daemon mode, default $HOME/.rtun/rtun.log)")
-	serverCmd.Flags().StringVarP(&downloadDir, "dir", "", ".", "Save downloads to this directory")
+	serverCmd.Flags().StringVarP(&downloadDir, "dir", "D", ".", "Save downloads to this directory")
 	rootCmd.AddCommand(serverCmd)
 }
 
