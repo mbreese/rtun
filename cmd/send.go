@@ -46,7 +46,7 @@ var sendCmd = &cobra.Command{
 			if i > 0 && i == len(args)-1 {
 				continue
 			}
-			fmt.Printf("Local: %s, Remote: %s %d\n", local, remote, i)
+			fmt.Printf("Local: %s, Remote: %s\n", local, remote)
 
 			finfo, err1 := os.Stat(local)
 			if err1 != nil {
