@@ -10,7 +10,18 @@ import (
 
 func init() {
 	viewCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Socket filename (default $HOME/.rtun/rtun.sock.*)")
+	openCmd.Flags().StringVarP(&socketFilename, "socket", "s", "", "Socket filename (default $HOME/.rtun/rtun.sock.*)")
 	rootCmd.AddCommand(viewCmd)
+	rootCmd.AddCommand(openCmd)
+}
+
+var openCmd = &cobra.Command{
+	Use:    "open",
+	Short:  "Open a file on the remote server (alias for view)",
+	Hidden: true,
+	Run: func(cmd *cobra.Command, args []string) {
+		viewCmd.Run(cmd, args)
+	},
 }
 
 var viewCmd = &cobra.Command{
