@@ -28,30 +28,28 @@ var viewCmd = &cobra.Command{
 	Use:   "view",
 	Short: "View a file on the remote server",
 	Run: func(cmd *cobra.Command, args []string) {
-		var local string
 
-		if len(args) > 0 {
-			local = args[0]
+		for i := 0; i < len(args); i++ {
+			local := args[i]
+
+			finfo, err1 := os.Stat(local)
+			if err1 != nil {
+				log.Fatal(err1)
+			}
+			if finfo.IsDir() {
+				log.Fatal("Cannot view a directory")
+			}
+
+			client := connect()
+			defer client.Close()
+
+			fmt.Printf("Viewing file: %s\n", local)
+
+			err := client.View(local)
+			if err != nil {
+				fmt.Println(err1.Error())
+				log.Fatal(err)
+			}
 		}
-
-		finfo, err1 := os.Stat(local)
-		if err1 != nil {
-			log.Fatal(err1)
-		}
-		if finfo.IsDir() {
-			log.Fatal("Cannot view a directory")
-		}
-
-		client := connect()
-		defer client.Close()
-
-		fmt.Printf("Viewing file: %s\n", local)
-
-		err := client.View(local)
-		if err != nil {
-			fmt.Println(err1.Error())
-			log.Fatal(err)
-		}
-
 	},
 }
