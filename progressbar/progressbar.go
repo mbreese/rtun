@@ -3,9 +3,7 @@ package progressbar
 import (
 	"fmt"
 	"os"
-	"syscall"
 	"time"
-	"unsafe"
 )
 
 var minUpdateMs int64 = 1000
@@ -133,15 +131,15 @@ type tmpWinsize struct {
 	ypix uint16
 }
 
-func getTermCols() int {
-	var ws tmpWinsize
-	ret, _, _ := syscall.Syscall(syscall.SYS_IOCTL, uintptr(syscall.Stdout), uintptr(syscall.TIOCGWINSZ), uintptr(unsafe.Pointer(&ws)))
-	if int(ret) == -1 {
-		// if an error, set the width to a fixed 60 columns
-		return 60
-	}
-	return int(ws.cols)
-}
+// func getTermCols() int {
+// 	var ws tmpWinsize
+// 	ret, _, _ := syscall.Syscall(syscall.SYS_IOCTL, uintptr(syscall.Stdout), uintptr(syscall.TIOCGWINSZ), uintptr(unsafe.Pointer(&ws)))
+// 	if int(ret) == -1 {
+// 		// if an error, set the width to a fixed 60 columns
+// 		return 60
+// 	}
+// 	return int(ws.cols)
+// }
 
 func prettyDuration(d time.Duration) string {
 
